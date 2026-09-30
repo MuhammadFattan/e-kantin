@@ -1,0 +1,24 @@
+{
+  "routes": [
+    { "path": "/", "title": "Beranda" },
+    { "path": "/search", "title": "Cari" },
+    { "path": "/canteens", "title": "Daftar Kantin" },
+    { "path": "/canteens/:id", "title": "Detail Kantin" },
+    { "path": "/products/:id", "title": "Detail Produk" },
+    { "path": "/cart", "title": "Keranjang" },
+    { "path": "/checkout", "title": "Checkout" },
+    { "path": "/orders", "title": "Riwayat Pesanan" },
+    { "path": "/orders/:id", "title": "Status Pesanan" },
+    { "path": "/login", "title": "Masuk Demo" },
+    { "path": "/admin", "title": "Dashboard Admin" },
+    { "path": "/admin/owners", "title": "Pemilik Kantin" },
+    { "path": "/admin/owners/create", "title": "Tambah Pemilik" },
+    { "path": "/admin/owners/:id/edit", "title": "Edit Pemilik" },
+    { "path": "/owner", "title": "Dashboard Pemilik" },
+    { "path": "/owner/products", "title": "Produk" },
+    { "path": "/owner/products/create", "title": "Tambah Produk" },
+    { "path": "/owner/products/:id/edit", "title": "Edit Produk" },
+    { "path": "/owner/orders", "title": "Pesanan Masuk" },
+    { "path": "/owner/profile", "title": "Profil Kantin" }
+  ]
+}
