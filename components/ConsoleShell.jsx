@@ -22,7 +22,7 @@ const adminNav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/applications", label: "Verifikasi", icon: BadgeCheck },
   { href: "/admin/owners", label: "Pemilik Kantin", icon: Users },
-  { href: "/canteens", label: "Kantin / UMKM", icon: Store },
+  { href: "/admin/canteens", label: "Kantin / UMKM", icon: Store },
 ];
 const ownerNav = [
   { href: "/owner", label: "Dashboard", icon: LayoutDashboard },
@@ -100,7 +100,6 @@ export default function ConsoleShell({ type = "owner", title, children }) {
           </span>
           <span>
             <strong>Kantin</strong>
-            <small>Raden Fatah</small>
           </span>
         </Link>
         <div className="console-role-label">

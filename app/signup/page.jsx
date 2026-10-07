@@ -63,7 +63,7 @@ export default function SignupPage() {
             <img src="/brand/kantin-icon.svg" alt="" />
           </span>
           <span>
-            <b>Kantin Raden Fatah</b>
+            <b>JajanGuys</b>
             <small>Buat akun baru</small>
           </span>
         </div>

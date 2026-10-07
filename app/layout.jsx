@@ -3,9 +3,9 @@ import { StoreProvider } from "@/context/StoreContext";
 import GlobalChrome from "@/components/GlobalChrome";
 
 export const metadata = {
-  title: "Kantin Raden Fatah — Makan Enak di Kampus",
+  title: "Makan Enak di Kampus",
   description:
-    "Temukan makanan favoritmu di kantin UMKM UIN Raden Fatah Palembang.",
+    "Temukan makanan favoritmu.",
   icons: { icon: "/brand/kantin-icon.svg" },
 };
 

@@ -100,7 +100,7 @@ export default function OwnerForm({ ownerId }) {
                   minLength={2}
                   value={values.name}
                   onChange={(event) => change("name", event.target.value)}
-                  placeholder="Contoh: Siti Aminah"
+                  placeholder="Contoh: Budi Santoso"
                 />
               </FormField>
               <FormField id="owner-username" label="Username" required>
@@ -116,7 +116,7 @@ export default function OwnerForm({ ownerId }) {
                       event.target.value.replace(/\s/g, "").toLowerCase(),
                     )
                   }
-                  placeholder="Contoh: sitikantin"
+                  placeholder="Contoh: budiusaha"
                 />
               </FormField>
               <FormField id="owner-phone" label="Nomor telepon" required>

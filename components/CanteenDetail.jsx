@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, Clock3, MapPin, Star, Utensils } from "lucide-react";
+import { ArrowLeft, Clock3, MapPin, Star, Store, Utensils } from "lucide-react";
 import CategoryStrip from "@/components/CategoryStrip";
 import ProductCard from "@/components/ProductCard";
 import FoodImage from "@/components/FoodImage";
 import { EmptyState, StatusBadge } from "@/components/ui";
 import { useStore } from "@/context/StoreContext";
+import { normalizeCategory } from "@/lib/data";
 
 export default function CanteenDetail({ canteenId }) {
-  const { canteens, products, orders } = useStore();
+  const { canteens, products } = useStore();
   const [category, setCategory] = useState("all");
   const canteen = canteens.find((item) => item.id === canteenId);
   if (!canteen)
@@ -30,13 +31,9 @@ export default function CanteenDetail({ canteenId }) {
   const menu = products.filter(
     (item) =>
       item.canteenId === canteen.id &&
-      (category === "all" || category === "makanan"
-        ? category === "all" ||
-          ["makanan", "pempek", "mie", "nasi"].includes(item.category)
-        : category === "minuman"
-          ? item.category === "minuman"
-          : item.category === category),
+      (category === "all" || normalizeCategory(item.category) === category),
   );
+  /*
   const occupiedSeats = orders
     .filter(
       (order) =>
@@ -53,6 +50,7 @@ export default function CanteenDetail({ canteenId }) {
     canteen.status === "Buka" &&
     canteen.dineInOpen !== false &&
     availableSeats > 0;
+  */
   return (
     <div className="page-container">
       <Link href="/canteens" className="back-link">
@@ -83,6 +81,18 @@ export default function CanteenDetail({ canteenId }) {
       </section>
       <div className="canteen-capacity-strip">
         <span>
+          <Store size={16} />
+          Pesanan dapat diambil langsung di kantin
+        </span>
+        <span>
+          {canteen.status === "Buka"
+            ? "Pickup tersedia"
+            : "Kantin sedang tutup"}
+        </span>
+      </div>
+      {/*
+      <div className="canteen-capacity-strip">
+        <span>
           <Utensils size={16} />
           {dineInAvailable
             ? `${availableSeats} kursi tersedia`
@@ -94,6 +104,7 @@ export default function CanteenDetail({ canteenId }) {
             : "Kantin sedang tutup"}
         </span>
       </div>
+      */}
       <div className="section-heading">
         <div>
           <h2>Menu kantin</h2>

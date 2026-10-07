@@ -29,7 +29,7 @@ export default function GlobalChrome({ children }) {
       {!isConsole && (
         <footer className="site-footer">
           <div className="footer-inner">
-            <span>© 2026 Kantin Raden Fatah</span>
+            <span>© 2026 JajanGuys</span>
             <span>UMKM lokal, semangat kampus.</span>
             <button
               type="button"

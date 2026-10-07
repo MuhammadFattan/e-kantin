@@ -73,7 +73,7 @@ export default function OwnerOrdersPage() {
       <PageHeading
         eyebrow={canteen?.name || "Pesanan kantin"}
         title="Pesanan masuk"
-        description="Proses pesanan makan di tempat maupun pengantaran hingga selesai."
+        description="Siapkan pesanan untuk diambil pelanggan setelah siap."
       />
       <div className="console-filter-row">
         <label className="filter-label" htmlFor="order-status-filter">

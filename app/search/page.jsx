@@ -8,6 +8,7 @@ import CategoryStrip from "@/components/CategoryStrip";
 import ProductCard from "@/components/ProductCard";
 import { EmptyState, PageHeading, SectionHeading } from "@/components/ui";
 import { useStore } from "@/context/StoreContext";
+import { normalizeCategory } from "@/lib/data";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function SearchPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setQuery(params.get("q") || "");
-    setCategory(params.get("category") || "all");
+    const requestedCategory = params.get("category");
+    setCategory(requestedCategory ? normalizeCategory(requestedCategory) : "all");
   }, []);
   const normalized = query.trim().toLocaleLowerCase("id-ID");
   const foundCanteens = useMemo(
@@ -41,11 +43,7 @@ export default function SearchPage() {
             .toLocaleLowerCase("id-ID")
             .includes(normalized);
         const matchesCategory =
-          category === "all"
-            ? true
-            : category === "makanan"
-              ? ["makanan", "pempek", "mie", "nasi"].includes(item.category)
-              : item.category === category;
+          category === "all" || normalizeCategory(item.category) === category;
         return item.available && matchesText && matchesCategory;
       }),
     [canteens, category, normalized, products],
@@ -63,7 +61,7 @@ export default function SearchPage() {
       <PageHeading
         eyebrow="Temukan menu"
         title="Cari makanan favoritmu"
-        description="Cari menu atau kantin di sekitar UIN Raden Fatah."
+        description="Cari menu atau kantin di sekitar kampus."
       />
       <form className="search-panel" onSubmit={submit}>
         <Search size={19} />

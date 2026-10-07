@@ -7,7 +7,7 @@ import { ArrowLeft, ImagePlus, Save } from "lucide-react";
 import ConsoleShell from "@/components/ConsoleShell";
 import { Button, FormField, PageHeading } from "@/components/ui";
 import { useStore } from "@/context/StoreContext";
-import { CATEGORIES } from "@/lib/data";
+import { CATEGORIES, normalizeCategory } from "@/lib/data";
 
 const menuImages = [
   [
@@ -75,7 +75,7 @@ export default function OwnerProductForm({ productId }) {
     if (existing) {
       setValues({
         name: existing.name || "",
-        category: existing.category || "makanan",
+        category: normalizeCategory(existing.category),
         description: existing.description || "",
         price: String(existing.price || ""),
         image: existing.image || menuImages[0][1],

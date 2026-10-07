@@ -18,6 +18,7 @@ import ProductCard from "@/components/ProductCard";
 import FoodImage from "@/components/FoodImage";
 import { SectionHeading } from "@/components/ui";
 import { useStore } from "@/context/StoreContext";
+import { normalizeCategory } from "@/lib/data";
 
 export default function HomePage() {
   const router = useRouter();
@@ -29,12 +30,7 @@ export default function HomePage() {
       products.filter(
         (item) =>
           item.available &&
-          (category === "all" || category === "makanan"
-            ? category === "all" ||
-              ["makanan", "pempek", "mie", "nasi"].includes(item.category)
-            : category === "minuman"
-              ? item.category === "minuman"
-              : item.category === category),
+          (category === "all" || normalizeCategory(item.category) === category),
       ),
     [category, products],
   );
@@ -50,10 +46,10 @@ export default function HomePage() {
         <div className="hero-inner">
           <div className="hero-copy">
             <span className="hero-kicker">
-              <span className="hero-kicker-dot" /> PILIHAN UMKM KAMPUS PALEMBANG
+              <span className="hero-kicker-dot" /> PILIHAN UMKM KAMPUS TERDEKAT
             </span>
             <h1>
-              Temukan Makanan <em>Favoritmu</em> di Kantin UIN Raden Fatah
+              Temukan Makanan <em>Favoritmu</em> di Kantin kampus
             </h1>
             <p className="hero-subtitle">
               Cari makanan, lihat harga, dan pesan dengan mudah.
@@ -128,7 +124,7 @@ export default function HomePage() {
             title={
               category === "all" ? "Menu favorit kampus" : `Menu ${category}`
             }
-            description="Pilihan enak dari UMKM kantin Raden Fatah."
+            description="Pilihan enak dari UMKM kantin kampus."
             href="/search"
           />
           <div className="product-grid">

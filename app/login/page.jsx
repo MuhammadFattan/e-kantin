@@ -54,7 +54,7 @@ export default function LoginPage() {
             <img src="/brand/kantin-icon.svg" alt="" />
           </span>
           <span>
-            <b>Kantin Raden Fatah</b>
+            <b>JajanGuys</b>
             <small>Masuk ke akun kamu</small>
           </span>
         </div>
@@ -137,9 +137,6 @@ export default function LoginPage() {
             autentikasi server produksi.
           </span>
         </div>
-        <Link href="/" className="login-home">
-          UIN Raden Fatah Palembang
-        </Link>
       </div>
     </div>
   );

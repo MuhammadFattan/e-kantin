@@ -8,10 +8,8 @@ import {
   Check,
   ClipboardCheck,
   MapPin,
+  PackageCheck,
   Store,
-  Truck,
-  Utensils,
-  Users,
 } from "lucide-react";
 import { Button, EmptyState, FormField, PageHeading } from "@/components/ui";
 import FoodImage from "@/components/FoodImage";
@@ -20,13 +18,13 @@ import { formatRupiah } from "@/lib/utils";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, products, canteens, orders, currentUser, placeOrder } =
+  const { cart, products, canteens, currentUser, placeOrder } =
     useStore();
   const [values, setValues] = useState({
     name: currentUser?.role === "student" ? currentUser.name : "",
     phone: currentUser?.role === "student" ? currentUser.phone : "",
     note: "",
-    fulfillmentMethod: "dine-in",
+    fulfillmentMethod: "pickup",
     partySize: "1",
     deliveryAddress: "",
   });
@@ -44,6 +42,7 @@ export default function CheckoutPage() {
   const canteen = items[0]
     ? canteens.find((item) => item.id === items[0].product.canteenId)
     : null;
+  /*
   const occupiedSeats = orders
     .filter(
       (order) =>
@@ -56,6 +55,7 @@ export default function CheckoutPage() {
     0,
     (Number(canteen?.maxSeats) || 0) - occupiedSeats,
   );
+  */
 
   function update(field, value) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -170,6 +170,25 @@ export default function CheckoutPage() {
           <h2 style={{ marginTop: 24 }}>Cara menerima pesanan</h2>
           <div className="fulfillment-options">
             <label
+              className={`fulfillment-option ${values.fulfillmentMethod === "pickup" ? "selected" : ""}`}
+            >
+              <input
+                type="radio"
+                name="fulfillment"
+                value="pickup"
+                checked={values.fulfillmentMethod === "pickup"}
+                onChange={(event) =>
+                  update("fulfillmentMethod", event.target.value)
+                }
+              />
+              <PackageCheck size={18} />
+              <span>
+                <b>Ambil di kantin</b>
+                <small>Ambil pesanan langsung setelah siap</small>
+              </span>
+            </label>
+            {/*
+            <label
               className={`fulfillment-option ${values.fulfillmentMethod === "dine-in" ? "selected" : ""} ${!canteen?.dineInOpen || !availableSeats ? "disabled" : ""}`}
             >
               <input
@@ -210,7 +229,18 @@ export default function CheckoutPage() {
                 <small>Pesanan dikirim ke alamat kamu</small>
               </span>
             </label>
+            */}
           </div>
+          {values.fulfillmentMethod === "pickup" ? (
+            <div className="pickup-note">
+              <Store size={15} />
+              <span>
+                Pesanan diambil langsung di {canteen?.name} setelah statusnya
+                siap.
+              </span>
+            </div>
+          ) : null}
+          {/*
           {values.fulfillmentMethod === "dine-in" ? (
             <div className="checkout-form fulfillment-fields">
               <FormField id="party-size" label="Jumlah orang / kursi" required>
@@ -263,6 +293,7 @@ export default function CheckoutPage() {
               </div>
             </div>
           )}
+          */}
           <div className="pickup-selected">
             <span>
               <Store size={17} />
@@ -321,7 +352,7 @@ export default function CheckoutPage() {
             <strong>{formatRupiah(total)}</strong>
           </div>
           <p className="summary-helper">
-            Biaya pengantaran, bila ada, dikonfirmasi oleh kantin.
+            Pembayaran dilakukan sesuai ketentuan kantin saat mengambil pesanan.
           </p>
         </aside>
       </div>

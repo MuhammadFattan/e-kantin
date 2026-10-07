@@ -72,7 +72,7 @@ export default function CartPage() {
               <Store size={15} />
               <span>
                 Pesanan ini untuk diambil langsung di <b>{canteen?.name}</b>.
-                Tidak ada layanan antar.
+                Belum ada layanan antar.
               </span>
             </div>
             <Link

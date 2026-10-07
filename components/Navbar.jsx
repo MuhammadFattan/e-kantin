@@ -22,8 +22,7 @@ export default function Navbar() {
             <img src="/brand/kantin-icon.svg" alt="" />
           </span>
           <span className="brand-copy">
-            <strong>Kantin</strong>
-            <small>Raden Fatah</small>
+            <strong>JajanGuys</strong>
           </span>
         </Link>
         <nav className="main-nav" aria-label="Navigasi utama">

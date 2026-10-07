@@ -12,7 +12,7 @@ export default function CanteensPage() {
       <PageHeading
         eyebrow="Di sekitar kampus"
         title="Kantin & UMKM"
-        description="Jelajahi pilihan kantin di lingkungan UIN Raden Fatah Palembang."
+        description="Jelajahi pilihan kantin di lingkungan kampus."
       />
       {canteens.length ? (
         <div className="canteen-grid">
@@ -35,10 +35,9 @@ export default function CanteensPage() {
         />
       )}
       <div style={{ marginTop: 28 }} className="pickup-note">
-        <Truck size={16} />
+        <Store size={16} />
         <span>
-          Pilih menu untuk memesan antar atau makan di tempat. Ketersediaan
-          kursi ditampilkan pada halaman masing-masing kantin.
+          Pilih menu untuk dipesan dan diambil langsung di kantin.
         </span>
       </div>
     </div>

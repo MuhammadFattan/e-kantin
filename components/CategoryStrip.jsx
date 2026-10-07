@@ -3,11 +3,7 @@
 import {
   Coffee,
   Grid2X2,
-  IceCream,
-  Sandwich,
-  Soup,
   Utensils,
-  Wheat,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/data";
 
@@ -15,10 +11,6 @@ const icons = {
   all: Grid2X2,
   makanan: Utensils,
   minuman: Coffee,
-  snack: IceCream,
-  pempek: Soup,
-  mie: Wheat,
-  nasi: Sandwich,
   lainnya: Grid2X2,
 };
 

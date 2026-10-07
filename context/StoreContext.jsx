@@ -26,6 +26,10 @@ const DEMO_ACCOUNTS_WITH_PASSWORDS = [
   { ...DEMO_ACCOUNTS.admin, password: "demo123" },
   ...SEED_OWNERS.map((owner) => ({ ...owner, password: "demo123" })),
 ];
+const isRemovedDemoOwner = (item) =>
+  item?.id === "owner-siti" ||
+  item?.username?.toLowerCase() === "sitikantin" ||
+  item?.name?.trim().toLowerCase() === "siti aminah";
 const activeDineInOrders = (orders, canteenId) =>
   orders
     .filter(
@@ -64,20 +68,79 @@ export function StoreProvider({ children }) {
       if (saved) {
         const data = JSON.parse(saved);
         if (data?.version === 1 || data?.version === 2) {
-          if (Array.isArray(data.owners)) setOwners(data.owners);
-          if (Array.isArray(data.canteens)) setCanteens(data.canteens);
-          if (Array.isArray(data.products)) setProducts(data.products);
-          if (Array.isArray(data.orders)) setOrders(data.orders);
-          if (Array.isArray(data.cart)) setCart(data.cart);
-          if (data.version === 2 && data.currentUser)
+          const savedOwners = Array.isArray(data.owners) ? data.owners : [];
+          const removedOwnerIds = new Set([
+            "owner-siti",
+            ...savedOwners
+              .filter(isRemovedDemoOwner)
+              .map((owner) => owner.id),
+          ]);
+          const savedCanteens = Array.isArray(data.canteens)
+            ? data.canteens
+            : [];
+          const removedCanteenIds = new Set([
+            "kantin-siti",
+            ...savedOwners
+              .filter((owner) => removedOwnerIds.has(owner.id))
+              .map((owner) => owner.canteenId),
+            ...savedCanteens
+              .filter((canteen) => removedOwnerIds.has(canteen.ownerId))
+              .map((canteen) => canteen.id),
+          ]);
+          const savedProducts = Array.isArray(data.products)
+            ? data.products
+            : [];
+          const removedProductIds = new Set(
+            savedProducts
+              .filter((product) => removedCanteenIds.has(product.canteenId))
+              .map((product) => product.id),
+          );
+          if (Array.isArray(data.owners))
+            setOwners(savedOwners.filter((owner) => !isRemovedDemoOwner(owner)));
+          if (Array.isArray(data.canteens))
+            setCanteens(
+              savedCanteens.filter(
+                (canteen) => !removedCanteenIds.has(canteen.id),
+              ),
+            );
+          if (Array.isArray(data.products))
+            setProducts(
+              savedProducts.filter(
+                (product) => !removedCanteenIds.has(product.canteenId),
+              ),
+            );
+          if (Array.isArray(data.orders))
+            setOrders(
+              data.orders.filter(
+                (order) =>
+                  !removedCanteenIds.has(order.canteenId) &&
+                  !order.items?.some((item) =>
+                    removedProductIds.has(item.productId),
+                  ),
+              ),
+            );
+          if (Array.isArray(data.cart))
+            setCart(
+              data.cart.filter(
+                (item) => !removedProductIds.has(item.productId),
+              ),
+            );
+          if (
+            data.version === 2 &&
+            data.currentUser &&
+            !isRemovedDemoOwner(data.currentUser)
+          )
             setCurrentUser(data.currentUser);
-          if (Array.isArray(data.accounts)) setAccounts(data.accounts);
+          if (Array.isArray(data.accounts))
+            setAccounts(data.accounts.filter((account) => !isRemovedDemoOwner(account)));
           else if (Array.isArray(data.owners))
             setAccounts([
               ...DEMO_ACCOUNTS_WITH_PASSWORDS.filter(
                 (item) => item.role !== "owner",
               ),
-              ...data.owners.map((owner) => ({
+              ...savedOwners
+                .filter((owner) => !isRemovedDemoOwner(owner))
+                .map((owner) => ({
                 ...owner,
                 password: "demo123",
               })),
@@ -237,8 +300,11 @@ export function StoreProvider({ children }) {
         );
         return null;
       }
-      const fulfillmentMethod =
-        form.fulfillmentMethod === "delivery" ? "delivery" : "dine-in";
+      const fulfillmentMethod = ["pickup", "delivery", "dine-in"].includes(
+        form.fulfillmentMethod,
+      )
+        ? form.fulfillmentMethod
+        : "pickup";
       const partySize = Math.max(1, Math.min(12, Number(form.partySize) || 1));
       const availableSeats = Math.max(
         0,
@@ -281,7 +347,11 @@ export function StoreProvider({ children }) {
         total: items.reduce((sum, item) => sum + item.subtotal, 0),
         note: form.note.trim(),
         pickupMethod:
-          fulfillmentMethod === "delivery" ? "Diantar" : "Makan di tempat",
+          fulfillmentMethod === "delivery"
+            ? "Diantar"
+            : fulfillmentMethod === "dine-in"
+              ? "Makan di tempat"
+              : "Ambil di kantin",
         status: "Menunggu",
         createdAt: new Date().toISOString(),
       };
