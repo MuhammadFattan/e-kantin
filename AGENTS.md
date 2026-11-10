@@ -6,4 +6,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
+Behavioral guidelines to reduce common LLM coding mistakes
+
+## 1. Think Before Coding
+Dont't assume. Don't hide confusion.
+## 2. Simplify First
+Minimum code that solves the problems.
+## 3. Surgical Changes
+Touch only what you must.
+## 4. Goal-Driven Execution
+Define success criteria.
 <!-- END:nextjs-agent-rules -->

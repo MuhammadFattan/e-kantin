@@ -11,6 +11,7 @@ import {
   Clock3,
   MapPin,
   PackageCheck,
+  Phone,
   ShoppingBag,
   Store,
   Truck,
@@ -99,7 +100,9 @@ export default function OrderDetail({ orderId }) {
           <span className="eyebrow">Berhasil dibuat</span>
           <h1>Pesanan berhasil dibuat</h1>
           <p>
-            Pesananmu sudah tercatat. Tunggu konfirmasi dari pemilik kantin.
+            {order.paymentMethod === "qris"
+              ? "Pesanan dan bukti QRIS sudah tercatat. Pemilik kantin akan memeriksa pembayaran secara manual sebelum memproses pesanan."
+              : "Pesananmu sudah tercatat. Tunggu konfirmasi dari pemilik kantin."}
           </p>
           <div className="order-number-box">
             <PackageCheck size={17} />#{order.id}
@@ -210,6 +213,16 @@ export default function OrderDetail({ orderId }) {
                   : `Ambil di ${canteen?.name || "kantin"} setelah pesanan siap.`}
             </span>
           </div>
+          <div className="pickup-note">
+            <Phone size={15} />
+            <span>
+              Nomor kontak pembeli: <b>{order.phone || "Tidak tersedia"}</b>.
+              {order.status === "Siap Diambil" ||
+              order.status === "Siap Diantar"
+                ? " Pesanan siap; notifikasi otomatis ke WhatsApp belum diaktifkan."
+                : ""}
+            </span>
+          </div>
         </section>
         <aside className="summary-card">
           <h2>Detail pesanan</h2>
@@ -240,10 +253,33 @@ export default function OrderDetail({ orderId }) {
             <span>Metode</span>
             <span>{serviceLabel}</span>
           </div>
+          <div className="summary-row">
+            <span>Pembayaran</span>
+            <span>
+              {order.paymentMethod === "qris"
+                ? "QRIS online"
+                : "Bayar di tempat"}
+            </span>
+          </div>
+          <div className="summary-row">
+            <span>Status pembayaran</span>
+            <span>{order.paymentStatus || "Bayar di Tempat"}</span>
+          </div>
           <div className="summary-row summary-total">
             <span>Total</span>
             <strong>{formatRupiah(order.total)}</strong>
           </div>
+          {order.paymentProof && (
+            <div className="payment-proof-detail">
+              <b>Bukti pembayaran yang diunggah</b>
+              <a href={order.paymentProof} target="_blank" rel="noreferrer">
+                <img
+                  src={order.paymentProof}
+                  alt="Screenshot bukti pembayaran QRIS"
+                />
+              </a>
+            </div>
+          )}
           {order.note && (
             <p className="summary-helper">Catatan: {order.note}</p>
           )}

@@ -16,7 +16,7 @@ const menuImages = [
   ],
   [
     "Nasi Goreng",
-    "/manus-storage/async-images/eZ8KJnT4wLLdMmRbhyf0Mo/image-4.webp",
+    "/menu/nasi-goreng.webp",
   ],
   [
     "Ayam Geprek",

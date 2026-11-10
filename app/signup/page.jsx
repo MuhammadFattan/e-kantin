@@ -32,12 +32,55 @@ export default function SignupPage() {
   const router = useRouter();
   const { registerStudent, registerOwner, notify } = useStore();
   const [values, setValues] = useState(initial);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpPhone, setOtpPhone] = useState("");
+  const [otpInput, setOtpInput] = useState("");
+  const [phoneVerified, setPhoneVerified] = useState(false);
+
   function update(field, value) {
     setValues((current) => ({ ...current, [field]: value }));
+    if (field === "phone") {
+      setOtpCode("");
+      setOtpPhone("");
+      setOtpInput("");
+      setPhoneVerified(false);
+    }
+  }
+
+  function sendDemoOtp() {
+    if (
+      !/^[+]?[0-9\s()-]{8,18}$/.test(values.phone.trim()) ||
+      values.phone.replace(/\D/g, "").length < 8
+    ) {
+      notify("Masukkan nomor telepon yang valid terlebih dahulu.", "error");
+      return;
+    }
+    setOtpCode(String(Math.floor(100000 + Math.random() * 900000)));
+    setOtpPhone(values.phone.trim());
+    setOtpInput("");
+    setPhoneVerified(false);
+    notify("Kode OTP demo dibuat. Kode tidak dikirim melalui SMS/WhatsApp.");
+  }
+
+  function verifyDemoOtp() {
+    if (!otpCode || otpPhone !== values.phone.trim()) {
+      notify("Buat kode OTP baru untuk nomor telepon ini.", "error");
+      return;
+    }
+    if (otpInput.trim() !== otpCode) {
+      notify("Kode OTP tidak cocok.", "error");
+      return;
+    }
+    setPhoneVerified(true);
+    notify("Kode demo cocok. Status aktif nomor belum diverifikasi.");
   }
 
   function submit(event) {
     event.preventDefault();
+    if (!phoneVerified || otpPhone !== values.phone.trim()) {
+      notify("Verifikasi kode OTP demo sebelum mendaftar.", "error");
+      return;
+    }
     if (values.password !== values.confirmPassword) {
       notify("Konfirmasi kata sandi belum cocok.", "error");
       return;
@@ -122,6 +165,60 @@ export default function SignupPage() {
                 onChange={(event) => update("phone", event.target.value)}
               />
             </FormField>
+            <FormField id="signup-otp" label="Kode OTP demo" required>
+              <input
+                className="field-input"
+                id="signup-otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                minLength={6}
+                maxLength={6}
+                value={otpInput}
+                onChange={(event) =>
+                  setOtpInput(event.target.value.replace(/\D/g, ""))
+                }
+                placeholder="6 digit"
+              />
+              <button
+                type="button"
+                className="button button-secondary button-sm"
+                style={{ marginTop: 8 }}
+                onClick={sendDemoOtp}
+              >
+                {otpCode ? "Buat ulang kode demo" : "Buat kode OTP demo"}
+              </button>
+            </FormField>
+            <div className="span-two">
+              <div className="demo-otp-notice" role="status" aria-live="polite">
+                <ShieldAlert size={16} />
+                <span>
+                  {otpCode ? (
+                    <>
+                      Kode demo untuk diuji: <b>{otpCode}</b>. Kode ini hanya
+                      tampil di aplikasi, tidak dikirim. Pencocokan kode tidak
+                      membuktikan nomor benar-benar aktif.
+                    </>
+                  ) : (
+                    "Mode demo: kode tidak dikirim dan tidak dapat memastikan nomor telepon aktif."
+                  )}
+                  {phoneVerified && (
+                    <b className="demo-otp-verified"> Kode cocok.</b>
+                  )}
+                </span>
+              </div>
+              {otpCode && !phoneVerified && (
+                <Button
+                  type="button"
+                  size="sm"
+                  style={{ marginTop: 8 }}
+                  onClick={verifyDemoOtp}
+                >
+                  Verifikasi kode
+                </Button>
+              )}
+            </div>
             <FormField id="signup-username" label="Username" required>
               <input
                 className="field-input"

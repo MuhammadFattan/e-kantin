@@ -5,6 +5,7 @@ import {
   Check,
   ClipboardList,
   Clock3,
+  CreditCard,
   PackageCheck,
   Store,
   Truck,
@@ -43,6 +44,7 @@ export default function OwnerOrdersPage() {
     canteens,
     orders,
     updateOrderStatus,
+    updatePaymentStatus,
     requestConfirmation,
   } = useStore();
   const owner = owners.find((item) => item.id === currentUser?.id) || owners[0];
@@ -136,6 +138,42 @@ export default function OwnerOrdersPage() {
                   {order.fulfillmentMethod === "delivery" && (
                     <span>{order.deliveryAddress}</span>
                   )}
+                </div>
+                <div className="order-payment-summary">
+                  <div>
+                    <b>
+                      {order.paymentMethod === "qris"
+                        ? "QRIS online"
+                        : "Bayar di tempat"}
+                    </b>
+                    <span>
+                      Status pembayaran:{" "}
+                      {order.paymentStatus || "Bayar di Tempat"}
+                    </span>
+                  </div>
+                  {order.paymentMethod === "qris" && order.paymentProof && (
+                    <a
+                      href={order.paymentProof}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-link"
+                    >
+                      Lihat bukti pembayaran
+                    </a>
+                  )}
+                  {order.paymentMethod === "qris" &&
+                    order.paymentStatus === "Menunggu Verifikasi" && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() =>
+                          updatePaymentStatus(order.id, "Terverifikasi")
+                        }
+                      >
+                        <CreditCard size={14} />
+                        Konfirmasi pembayaran
+                      </Button>
+                    )}
                 </div>
                 <div className="console-order-items">
                   {order.items.map((item, index) => (

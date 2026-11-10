@@ -7,9 +7,12 @@ import {
   ArrowLeft,
   Check,
   ClipboardCheck,
+  CreditCard,
+  Download,
   MapPin,
   PackageCheck,
   Store,
+  Upload,
 } from "lucide-react";
 import { Button, EmptyState, FormField, PageHeading } from "@/components/ui";
 import FoodImage from "@/components/FoodImage";
@@ -18,12 +21,14 @@ import { formatRupiah } from "@/lib/utils";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, products, canteens, currentUser, placeOrder } =
+  const { cart, products, canteens, currentUser, placeOrder, notify } =
     useStore();
   const [values, setValues] = useState({
     name: currentUser?.role === "student" ? currentUser.name : "",
     phone: currentUser?.role === "student" ? currentUser.phone : "",
     note: "",
+    paymentMethod: "cash",
+    paymentProof: "",
     fulfillmentMethod: "pickup",
     partySize: "1",
     deliveryAddress: "",
@@ -42,6 +47,11 @@ export default function CheckoutPage() {
   const canteen = items[0]
     ? canteens.find((item) => item.id === items[0].product.canteenId)
     : null;
+  const qrisExtension = canteen?.paymentQr?.startsWith("data:image/jpeg")
+    ? "jpg"
+    : canteen?.paymentQr?.startsWith("data:image/webp")
+      ? "webp"
+      : "png";
   /*
   const occupiedSeats = orders
     .filter(
@@ -60,28 +70,51 @@ export default function CheckoutPage() {
   function update(field, value) {
     setValues((current) => ({ ...current, [field]: value }));
   }
+
+  function uploadPaymentProof(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      notify("Gunakan screenshot berformat PNG, JPG, atau WebP.", "error");
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      notify("Ukuran screenshot pembayaran maksimal 1 MB.", "error");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string")
+        update("paymentProof", reader.result);
+      else notify("Screenshot pembayaran tidak dapat dibaca.", "error");
+    };
+    reader.onerror = () =>
+      notify("Screenshot pembayaran tidak dapat dibaca.", "error");
+    reader.readAsDataURL(file);
+  }
+
   function submit(event) {
     event.preventDefault();
-    if (currentUser?.role && currentUser.role !== "student")
-      return (
-        <div className="page-container">
-          <PageHeading
-            eyebrow="Checkout dibatasi"
-            title="Pemesanan untuk pembeli"
-            description="Akun pemilik dan admin tidak dapat membuat pesanan."
-          />
-          <EmptyState
-            icon={Store}
-            title="Gunakan akun mahasiswa / staf"
-            description="Ganti ke akun pembeli untuk melanjutkan pesanan."
-            action={
-              <Link href="/login" className="button button-primary button-md">
-                Ganti akun
-              </Link>
-            }
-          />
-        </div>
-      );
+    if (currentUser?.role && currentUser.role !== "student") {
+      notify("Akun pemilik dan admin tidak dapat membuat pesanan.", "error");
+      return;
+    }
+    if (values.paymentMethod === "qris" && !canteen?.paymentQr) {
+      notify("QRIS kantin belum tersedia untuk pembayaran online.", "error");
+      return;
+    }
+    if (
+      !/^[+]?[0-9\s()-]{8,18}$/.test(values.phone.trim()) ||
+      values.phone.replace(/\D/g, "").length < 8
+    ) {
+      notify("Masukkan nomor telepon yang valid.", "error");
+      return;
+    }
+    if (values.paymentMethod === "qris" && !values.paymentProof) {
+      notify("Unggah screenshot pembayaran QRIS terlebih dahulu.", "error");
+      return;
+    }
     setSubmitting(true);
     const order = placeOrder(values);
     if (!order) {
@@ -167,6 +200,104 @@ export default function CheckoutPage() {
               </FormField>
             </div>
           </div>
+          <h2 style={{ marginTop: 24 }}>Metode pembayaran</h2>
+          <div className="payment-method-options">
+            <label
+              className={`payment-method-option ${values.paymentMethod === "cash" ? "selected" : ""}`}
+            >
+              <input
+                type="radio"
+                name="payment-method"
+                value="cash"
+                checked={values.paymentMethod === "cash"}
+                onChange={(event) =>
+                  update("paymentMethod", event.target.value)
+                }
+              />
+              <Store size={18} />
+              <span>
+                <b>Bayar di tempat</b>
+                <small>Bayar langsung saat mengambil pesanan</small>
+              </span>
+            </label>
+            <label
+              className={`payment-method-option ${values.paymentMethod === "qris" ? "selected" : ""} ${!canteen?.paymentQr ? "disabled" : ""}`}
+            >
+              <input
+                type="radio"
+                name="payment-method"
+                value="qris"
+                checked={values.paymentMethod === "qris"}
+                disabled={!canteen?.paymentQr}
+                onChange={(event) =>
+                  update("paymentMethod", event.target.value)
+                }
+              />
+              <CreditCard size={18} />
+              <span>
+                <b>QRIS online</b>
+                <small>
+                  {canteen?.paymentQr
+                    ? "Pindai QR, bayar, lalu unggah screenshot"
+                    : "QRIS belum diatur pemilik kantin"}
+                </small>
+              </span>
+            </label>
+          </div>
+          {values.paymentMethod === "qris" && canteen?.paymentQr && (
+            <div className="payment-proof-panel">
+              <h3>Bayar dengan QRIS</h3>
+              <img
+                className="payment-qr-image"
+                src={canteen.paymentQr}
+                alt={`QRIS ${canteen.name}`}
+              />
+              <a
+                className="button button-secondary button-sm"
+                href={canteen.paymentQr}
+                download={`QRIS-${canteen.name.replace(/[^a-z0-9]/gi, "-")}.${qrisExtension}`}
+              >
+                <Download size={14} />
+                Unduh QRIS
+              </a>
+              <p>
+                QRIS ini statis. Pastikan nominal pembayaran sesuai total{" "}
+                {formatRupiah(total)}. Setelah membayar, unggah screenshot bukti
+                pembayaran. Pemilik kantin akan memeriksa bukti secara manual
+                sebelum pesanan diproses; aplikasi tidak menerima konfirmasi
+                pembayaran dari bank.
+              </p>
+              <FormField
+                id="payment-proof"
+                label="Screenshot bukti pembayaran"
+                required
+                hint="Format gambar, maksimal 1 MB."
+              >
+                <label className="file-upload" htmlFor="payment-proof">
+                  <Upload size={15} />
+                  <span>
+                    {values.paymentProof
+                      ? "Ganti screenshot pembayaran"
+                      : "Pilih screenshot pembayaran"}
+                  </span>
+                  <input
+                    id="payment-proof"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    required={!values.paymentProof}
+                    onChange={uploadPaymentProof}
+                  />
+                </label>
+              </FormField>
+              {values.paymentProof && (
+                <img
+                  className="payment-proof-image"
+                  src={values.paymentProof}
+                  alt="Preview screenshot bukti pembayaran"
+                />
+              )}
+            </div>
+          )}
           <h2 style={{ marginTop: 24 }}>Cara menerima pesanan</h2>
           <div className="fulfillment-options">
             <label
@@ -352,7 +483,9 @@ export default function CheckoutPage() {
             <strong>{formatRupiah(total)}</strong>
           </div>
           <p className="summary-helper">
-            Pembayaran dilakukan sesuai ketentuan kantin saat mengambil pesanan.
+            {values.paymentMethod === "qris"
+              ? "Pembayaran QRIS menunggu pemeriksaan manual dari pemilik kantin."
+              : "Pembayaran dilakukan langsung di kantin saat mengambil pesanan."}
           </p>
         </aside>
       </div>

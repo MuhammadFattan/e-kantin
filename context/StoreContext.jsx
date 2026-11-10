@@ -71,9 +71,7 @@ export function StoreProvider({ children }) {
           const savedOwners = Array.isArray(data.owners) ? data.owners : [];
           const removedOwnerIds = new Set([
             "owner-siti",
-            ...savedOwners
-              .filter(isRemovedDemoOwner)
-              .map((owner) => owner.id),
+            ...savedOwners.filter(isRemovedDemoOwner).map((owner) => owner.id),
           ]);
           const savedCanteens = Array.isArray(data.canteens)
             ? data.canteens
@@ -96,7 +94,9 @@ export function StoreProvider({ children }) {
               .map((product) => product.id),
           );
           if (Array.isArray(data.owners))
-            setOwners(savedOwners.filter((owner) => !isRemovedDemoOwner(owner)));
+            setOwners(
+              savedOwners.filter((owner) => !isRemovedDemoOwner(owner)),
+            );
           if (Array.isArray(data.canteens))
             setCanteens(
               savedCanteens.filter(
@@ -132,7 +132,9 @@ export function StoreProvider({ children }) {
           )
             setCurrentUser(data.currentUser);
           if (Array.isArray(data.accounts))
-            setAccounts(data.accounts.filter((account) => !isRemovedDemoOwner(account)));
+            setAccounts(
+              data.accounts.filter((account) => !isRemovedDemoOwner(account)),
+            );
           else if (Array.isArray(data.owners))
             setAccounts([
               ...DEMO_ACCOUNTS_WITH_PASSWORDS.filter(
@@ -141,9 +143,9 @@ export function StoreProvider({ children }) {
               ...savedOwners
                 .filter((owner) => !isRemovedDemoOwner(owner))
                 .map((owner) => ({
-                ...owner,
-                password: "demo123",
-              })),
+                  ...owner,
+                  password: "demo123",
+                })),
             ]);
         }
       }
@@ -291,11 +293,32 @@ export function StoreProvider({ children }) {
         }))
         .filter((entry) => entry.product);
       if (!cartProducts.length) return null;
+      if (!form.name?.trim() || !form.phone?.trim()) {
+        notify("Nama dan nomor telepon wajib diisi.", "error");
+        return null;
+      }
+      if (
+        form.paymentMethod === "qris" &&
+        (!form.paymentProof || !form.paymentProof.startsWith("data:image/"))
+      ) {
+        notify(
+          "Unggah bukti pembayaran QRIS sebelum membuat pesanan.",
+          "error",
+        );
+        return null;
+      }
       const canteenId = cartProducts[0].product.canteenId;
       const canteen = canteens.find((item) => item.id === canteenId);
       if (!canteen || canteen.status !== "Buka") {
         notify(
           "Kantin sedang tutup dan belum dapat menerima pesanan.",
+          "error",
+        );
+        return null;
+      }
+      if (form.paymentMethod === "qris" && !canteen.paymentQr) {
+        notify(
+          "Kantin ini belum mengatur QRIS untuk pembayaran online.",
           "error",
         );
         return null;
@@ -339,6 +362,12 @@ export function StoreProvider({ children }) {
         customerName: form.name.trim(),
         phone: form.phone.trim(),
         canteenId,
+        paymentMethod: form.paymentMethod === "qris" ? "qris" : "cash",
+        paymentStatus:
+          form.paymentMethod === "qris"
+            ? "Menunggu Verifikasi"
+            : "Bayar di Tempat",
+        paymentProof: form.paymentMethod === "qris" ? form.paymentProof : "",
         fulfillmentMethod,
         deliveryAddress:
           fulfillmentMethod === "delivery" ? form.deliveryAddress.trim() : "",
@@ -370,6 +399,17 @@ export function StoreProvider({ children }) {
         notify("Perubahan status tidak tersedia untuk pesanan ini.", "error");
         return false;
       }
+      if (
+        order.paymentMethod === "qris" &&
+        order.paymentStatus !== "Terverifikasi" &&
+        status !== "Dibatalkan"
+      ) {
+        notify(
+          "Verifikasi bukti pembayaran QRIS sebelum memproses pesanan.",
+          "error",
+        );
+        return false;
+      }
       setOrders((list) =>
         list.map((item) =>
           item.id === orderId
@@ -381,6 +421,39 @@ export function StoreProvider({ children }) {
       return true;
     },
     [notify, orders],
+  );
+
+  const updatePaymentStatus = useCallback(
+    (orderId, status) => {
+      const order = orders.find((item) => item.id === orderId);
+      if (
+        currentUser?.role !== "owner" ||
+        order?.canteenId !== currentUser.canteenId ||
+        order?.paymentMethod !== "qris" ||
+        order.paymentStatus !== "Menunggu Verifikasi" ||
+        status !== "Terverifikasi"
+      ) {
+        notify(
+          "Verifikasi pembayaran tidak tersedia untuk pesanan ini.",
+          "error",
+        );
+        return false;
+      }
+      setOrders((list) =>
+        list.map((item) =>
+          item.id === orderId
+            ? {
+                ...item,
+                paymentStatus: status,
+                paymentVerifiedAt: new Date().toISOString(),
+              }
+            : item,
+        ),
+      );
+      notify(`Pembayaran pesanan ${orderId} ditandai terverifikasi.`);
+      return true;
+    },
+    [currentUser, notify, orders],
   );
 
   const addProduct = useCallback(
@@ -822,6 +895,7 @@ export function StoreProvider({ children }) {
       clearCart,
       placeOrder,
       updateOrderStatus,
+      updatePaymentStatus,
       addProduct,
       updateProduct,
       deleteProduct,
@@ -859,6 +933,7 @@ export function StoreProvider({ children }) {
       clearCart,
       placeOrder,
       updateOrderStatus,
+      updatePaymentStatus,
       addProduct,
       updateProduct,
       deleteProduct,
