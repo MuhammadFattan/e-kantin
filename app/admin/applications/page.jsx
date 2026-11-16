@@ -40,7 +40,7 @@ export default function OwnerApplicationsPage() {
       <PageHeading
         eyebrow="Pemeriksaan pendaftaran"
         title="Verifikasi pemilik kantin"
-        description="Periksa kecocokan data pemilik, nomor KTP, produk, dan lokasi sebelum aktivasi."
+        description="Periksa data pemilik, berkas identitas, produk, dan lokasi sebelum aktivasi."
       />
       <div className="console-filter-row">
         <label className="check-row">
@@ -97,7 +97,6 @@ export default function OwnerApplicationsPage() {
                       {owner.phone}
                     </p>
                     <p>Username: @{owner.username}</p>
-                    <p>Nomor KTP: {owner.ktpNumber || "Tidak disediakan"}</p>
                     <p>
                       <Store size={15} />
                       <b>{canteen?.name || "Nama usaha belum tersedia"}</b>

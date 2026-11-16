@@ -651,7 +651,6 @@ export function StoreProvider({ children }) {
         role: "owner",
         status: "Menunggu Verifikasi",
         canteenId,
-        ktpNumber: values.ktpNumber.trim(),
         applicationProducts: values.products.trim(),
       };
       const canteen = {

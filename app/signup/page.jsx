@@ -20,7 +20,6 @@ const initial = {
   password: "",
   confirmPassword: "",
   phone: "",
-  ktpNumber: "",
   canteenName: "",
   location: "",
   description: "",
@@ -276,18 +275,6 @@ export default function SignupPage() {
                 <p>Pengajuan diperiksa admin sebelum akun kantin aktif.</p>
               </div>
               <div className="form-grid">
-                <FormField id="signup-ktp-number" label="Nomor KTP" required>
-                  <input
-                    className="field-input"
-                    id="signup-ktp-number"
-                    required
-                    minLength={8}
-                    value={values.ktpNumber}
-                    onChange={(event) =>
-                      update("ktpNumber", event.target.value)
-                    }
-                  />
-                </FormField>
                 <FormField
                   id="signup-canteen-name"
                   label="Nama kantin / usaha"
